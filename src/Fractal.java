@@ -1,5 +1,6 @@
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 
 public abstract class Fractal{
 	double img_rate = 0;
@@ -7,17 +8,21 @@ public abstract class Fractal{
 	Complex low,high;	// lower-left and upper-right coordinates
 	int nrows,ncols;	// pixel counting
 	int maxIters;	// how many iterations to consider
-	int numThreads;
+	int numThreads; // how many threads there are
+	Complex[][] complexMatrix; // matrix of the complex numbers.
+	ArrayList<MatrixSplitter> numOfThreadedMatrices = new ArrayList<MatrixSplitter>();
+	ArrayList<int[][]> splitEscapeVals = new ArrayList<int[][]>();
 	int[][] escapeVals;	// cached answers for each point's iterations to escape
 	Complex c;	// what is the c value of the iteration function? (boring for Mendelbrot)
 	
-	public Fractal(Complex iMG_LOW, Complex iMG_HIGH, int iMG_WIDTH,int iMG_HEIGHT, int maxIters, int numThreads){
-		this.low = iMG_LOW;
-		this.high = iMG_HIGH;
-		this.ncols = iMG_WIDTH;
-		this.nrows = iMG_HEIGHT;
+	public Fractal(Complex low, Complex high, int ncols,int nrows, int maxIters, int numThreads){
+		this.low = low;
+		this.high = high;
+		this.ncols = ncols;
+		this.nrows = nrows;
 		this.maxIters = maxIters;
 		this.escapeVals = new int[nrows][ncols];
+		this.complexMatrix = new Complex[nrows][ncols];
 		this.numThreads = numThreads;
 		double real_dist = 0;
 		double img_dist = 0;
@@ -41,7 +46,7 @@ public abstract class Fractal{
 	 * Given one point p,how many iterations can you follow, up	to	maxIters,	before	it	escapes?	
 	 * This	means all points in	the	set	will return	maxIters.
 	 */
-	//public abstract int escapeCount(Complex p);
+	public abstract int escapeCount(Complex p);
 	
 	/*
 	 * Calculate	escape	counts	for	each	point	indicated	by	current	instance variables;	
@@ -60,23 +65,41 @@ public abstract class Fractal{
 		 * return matrix
 		 */
 		//System.out.printf("Real rate: %f Img rate: %f\n",real_rate,img_rate);
-		System.out.println(numThreads);
+		//System.out.println(numThreads);
 		double i_val = high.i;
 		double r_val = low.r;
 		for(int x=0;x<nrows;x++){
 			for(int y=0;y<ncols;y++){
-				escapeVals[x][y]=escapeCount(new Complex(r_val,i_val));
+				//escapeVals[x][y]=escapeCount(new Complex(r_val,i_val));
+				complexMatrix[x][y] = new Complex(r_val,i_val);
 				r_val = r_val + real_rate;
 			}
 			r_val = low.r;
 			i_val  = i_val - img_rate;
 			//System.out.println();
 		}
-		// makes sure only one thread can return at a time.
+		int rowsPerThread = nrows / numThreads;
+		for(int z=0;z<rowsPerThread;z+=rowsPerThread){
+			Complex[][] perThread = new Complex[rowsPerThread][ncols];
+			for(int x = 0;x < rowsPerThread;x++){
+				for(int y =0; y<ncols; y++){
+					perThread[x][y] = complexMatrix[x][y];
+				}
+			}
+			MatrixSplitter m;
+			if(this instanceof Mandelbrot)
+				m = new MatrixSplitter(perThread,"Mandelbrot",this.maxIters,null);
+			else
+				m = new MatrixSplitter(perThread,"Julia",this.maxIters,this.c);
+			this.numOfThreadedMatrices.add(m);
+		}
+		try{for(MatrixSplitter m : this.numOfThreadedMatrices){m.join();}}catch(InterruptedException e){e.printStackTrace();}
+		for(MatrixSplitter m : this.numOfThreadedMatrices){
+			this.splitEscapeVals.add(m.calculatedEscapeCounts);
+		}
+		MatrixSplitter.combine(splitEscapeVals, nrows, ncols);
 		return escapeVals;
 	}
-	
-	public abstract int escapeCount(Complex p);
 	
 	
 	/*

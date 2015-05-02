@@ -92,7 +92,7 @@ public class MatrixSplitter extends Thread {
 			System.out.println("Not a configured Fractal type.");
 	}
 	
-	public int[][] combine(ArrayList<int[][]> matrices,int rowSize,int colSize){
+	public static int[][] combine(ArrayList<int[][]> matrices,int rowSize,int colSize){
 		int [][] fullMatrix = new int[rowSize][colSize];
 		int rowCount =0;
 		for(int[][] matrix : matrices){
