@@ -2,15 +2,15 @@ import java.util.ArrayList;
 
 
 public class MatrixSplitter extends Thread {
-	Complex[] complexRow;
+	Complex[][] complexRows;
 	String fractalType;
 	int maxIters;
 	Complex c;
-	int [] calculatedEscapeCounts;
+	int [][] calculatedEscapeCounts;
 	
 	//c is null for Mandelbrot
-	public MatrixSplitter(Complex[] complexRow,String fractalType,int maxIters,Complex c){
-		this.complexRow = complexRow;
+	public MatrixSplitter(Complex[][] complexRows,String fractalType,int maxIters,Complex c){
+		this.complexRows = complexRows;
 		this.fractalType = fractalType;
 		this.maxIters = maxIters;
 		this.c = c;
@@ -66,15 +66,25 @@ public class MatrixSplitter extends Thread {
 	public void run(){
 		if(fractalType.equals("Mandelbrot")){
 			int i = 0;
-			for(Complex c : complexRow){
-				calculatedEscapeCounts[i] = escapeCountM(c);
+			int j =0;
+			for(Complex[] row : complexRows){
+				for(Complex val : row){
+					calculatedEscapeCounts[i][j] = escapeCountM(val);
+					j++;
+				}
+				j=0;
 				i++;
 			}
 		}
 		else if(fractalType.equals("Julia")){
-			int i=0;
-			for(Complex c : complexRow){
-				calculatedEscapeCounts[i] = escapeCountJ(c);
+			int i = 0;
+			int j =0;
+			for(Complex[] row : complexRows){
+				for(Complex val : row){
+					calculatedEscapeCounts[i][j] = escapeCountJ(val);
+					j++;
+				}
+				j=0;
 				i++;
 			}
 		}
@@ -82,12 +92,14 @@ public class MatrixSplitter extends Thread {
 			System.out.println("Not a configured Fractal type.");
 	}
 	
-	public int[][] combine(ArrayList<int[]> rows,int colSize){
-		int [][] fullMatrix = new int[rows.size()][colSize];
-		int i =0;
-		for(int[] row : rows){
-			fullMatrix[i] = row;
-			i++;
+	public int[][] combine(ArrayList<int[][]> matrices,int rowSize,int colSize){
+		int [][] fullMatrix = new int[rowSize][colSize];
+		int rowCount =0;
+		for(int[][] matrix : matrices){
+			for(int[] row : matrix){
+				fullMatrix[rowCount] = row;
+			}
+			rowCount++;
 		}
 		return fullMatrix;
 	}
