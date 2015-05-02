@@ -9,8 +9,7 @@ public class Mandelbrot extends Fractal{
 		this.c = new Complex(0,0);
 	}
 
-	@Override
-	public int escapeCount(Complex p) {
+	/*public int escapeCount(Complex p) {
 		this.c = p;
 		Complex z = new Complex(0,0);
 		int max = 0;// this is just in case it goes above two and then back under two.
@@ -28,13 +27,14 @@ public class Mandelbrot extends Fractal{
 		// TODO Auto-generated method stub
 		this.c = new Complex(0,0);
 		return max;
-	}
+	}*/
 	
 	public static void main(String[] args) throws FileNotFoundException, InterruptedException{
 		
 		if(args.length == 9){
 			Mandelbrot m = new Mandelbrot(new Complex(Double.parseDouble(args[0]),Double.parseDouble(args[2])),new Complex(Double.parseDouble(args[1]),Double.parseDouble(args[3])),Integer.parseInt(args[5]),Integer.parseInt(args[4]),Integer.parseInt(args[6]), Integer.parseInt(args[7]));
-			//m.write(args[7]);
+			m.escapes();
+			m.write(args[8]);
 		}
 		else
 			System.out.println("Error: Either too many or too little args.\n");

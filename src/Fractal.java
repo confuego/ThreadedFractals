@@ -46,7 +46,7 @@ public abstract class Fractal{
 	 * Given one point p,how many iterations can you follow, up	to	maxIters,	before	it	escapes?	
 	 * This	means all points in	the	set	will return	maxIters.
 	 */
-	public abstract int escapeCount(Complex p);
+	//public abstract int escapeCount(Complex p);
 	
 	/*
 	 * Calculate	escape	counts	for	each	point	indicated	by	current	instance variables;	
@@ -69,19 +69,28 @@ public abstract class Fractal{
 		int rowsPerThread = nrows / numThreads;
 		double r_val = low.r;
 		double i_val = high.i;
-		System.out.println(rowsPerThread);
+		//System.out.println("Rows per Thread is: " + rowsPerThread);
 		for(int x=0;x<numThreads;x++){
 			MatrixSplitter m = new MatrixSplitter(r_val,i_val,low,rowsPerThread,ncols,real_rate,img_rate,maxIters,"Mandelbrot",c);
 			this.numOfThreadedMatrices.add(m);
-			m.start();
 			r_val = m.r_val;
 			i_val = m.i_val;
+		}
+		for(MatrixSplitter m : this.numOfThreadedMatrices){
+			m.start();
 		}
 		try{for(MatrixSplitter m : this.numOfThreadedMatrices){m.join();}}catch(InterruptedException e){e.printStackTrace();}
 		for(MatrixSplitter m : this.numOfThreadedMatrices){
 			this.splitEscapeVals.add(m.calculatedEscapeCounts);
 		}
 		escapeVals = MatrixSplitter.combine(splitEscapeVals, nrows, ncols);
+		/*for(int[] row : escapeVals){
+			for(int val : row){
+				System.out.print(val + " ");
+			}
+			System.out.println();
+		}
+		System.out.println();*/
 		return escapeVals;
 	}
 	
@@ -136,7 +145,7 @@ public abstract class Fractal{
 	public	void updateDimensions(Complex low,Complex high){
 		this.low = low;
 		this.high = high;
-		//this.escapes();
+		this.escapes();
 		
 	}
 	

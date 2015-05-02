@@ -28,53 +28,52 @@ public class MatrixSplitter extends Thread {
 		this.r_val = r_val;
 		this.i_val = i_val;
 		
+		/*for(Complex[] row : complexMatrix){
+			for(Complex val : row){
+				System.out.print(val + ", ");
+			}
+			System.out.println();
+		}
+		System.out.println();*/
+		
 	}
 	
 	public int escapeCountJ(Complex p){
-		Complex z = new Complex(p.r,p.i);
-		int escape=0;
-		for (int i=0;i<=maxIters;i++){
-			
-			Complex znext = new Complex(0,0);	//create new z
-			
-			
-			znext.r=(z.r*z.r)-(z.i*z.i);	//calculate z^2
-			znext.i=(z.r*z.i)+(z.i*z.r);
-			
-			
-			znext.r+=c.r;	//add p to z
-			znext.i+=c.i;
-
-			escape=i;
-			if (Math.abs(Math.sqrt(znext.r*znext.r+znext.i*znext.i))>=2){
-				return escape;		//if magnitude of z > 2
-			}
-			z=znext;
-			
+		Complex z = p;
+		int max = 0;// this is just in case it goes above two and then back under two.
+		int count=0;
+		while(count<=this.maxIters){
+			double val = Complex.abs(z);
+			if(val <= 2)
+				max=count;
+			if(val > 2)
+				break;
+			z = Complex.add(Complex.mul(z, z), c);
+			//System.out.printf("Z is: %s\n",z);
+			count++;
 		}
-		return escape;
+		notifyAll();
+		return max;
 	}
 	
 	public int escapeCountM(Complex p){
+		this.c = p;
 		Complex z = new Complex(0,0);
-		int escape=0;
-		for (int i=0;i<=maxIters;i++){
-
-			Complex znext = new Complex(0,0);		//create new z
-			
-			znext.r= (z.r*z.r)-(z.i*z.i);		//calculate z^2
-			znext.i= (z.r*z.i)+(z.i*z.r);
-			
-			znext.r+=p.r;		//add p to z
-			znext.i+=p.i;
-			
-			escape=i;
-			if (Math.abs(Math.sqrt(znext.r*znext.r+znext.i*znext.i))>2){			//instead of 2
-				return escape;		//is magnitude of z >2
-			}
-			z=znext;
+		int max = 0;// this is just in case it goes above two and then back under two.
+		int count=0;
+		while(count<=this.maxIters){
+			double val = Complex.abs(z);
+			if(val <= 2)
+				max=count;
+			if(val > 2)
+				break;
+			z = Complex.add(Complex.mul(z, z), c);
+			//System.out.printf("Z is: %s\n",z);
+			count++;
 		}
-		return escape;
+		// TODO Auto-generated method stub
+		this.c = new Complex(0,0);
+		return max;
 	}
 	
 	public void run(){
@@ -104,6 +103,16 @@ public class MatrixSplitter extends Thread {
 		}
 		else
 			System.out.println("Not a configured Fractal type.");
+		/*synchronized(this){
+			for(int[] row : this.calculatedEscapeCounts){
+				for(int val : row){
+					System.out.print(val + " ");
+				}
+				System.out.println();
+			}
+			System.out.println();
+			System.out.println("Finished with " + Thread.currentThread().getName());
+		}*/
 	}
 	
 	public static int[][] combine(ArrayList<int[][]> matrices,int rowSize,int colSize){
@@ -112,8 +121,9 @@ public class MatrixSplitter extends Thread {
 		for(int[][] matrix : matrices){
 			for(int[] row : matrix){
 				fullMatrix[rowCount] = row;
+				rowCount++;
 			}
-			rowCount++;
+			//rowCount = 0;
 		}
 		return fullMatrix;
 	}
