@@ -1,6 +1,7 @@
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.text.*;
 
 public abstract class Fractal{
 	double img_rate = 0;
@@ -55,42 +56,35 @@ public abstract class Fractal{
 	 * this	means	you	should	have answer[0][0]	@	(-2+2i),	answer[0][ncols-1]	@	(+2+2i),	answer[nrows-1][0]	@	(-2-2i),	and	answer[nrows-1][ncols-1]	@	(+2-2i).	
 	 */
 	public int[][] escapes(){
-		/*
-		 * Calculate distance between the imaginaries and the real #'s
-		 * rate = divide img_distance/nrows && divide real_distance/ncols 
-		 * Loop through array
-		 * at every change in row, subtract the imaginary portion of the Complex number by the rate calculated - start @ high.i 
-		 * at every change in column, add to the real portion of the Complex number by the rate calculated - start @ low.r
-		 * pass that Complex number into the escapeCount() function
-		 * return matrix
-		 */
-		//System.out.printf("Real rate: %f Img rate: %f\n",real_rate,img_rate);
-		//System.out.println(numThreads);
 		int rowsPerThread = nrows / numThreads;
 		double r_val = low.r;
 		double i_val = high.i;
-		//System.out.println("Rows per Thread is: " + rowsPerThread);
+		
+		
+		String type = "Mandelbrot";
+		if(this instanceof Julia){
+			type = "Julia";
+		}
+		
+		long start = System.currentTimeMillis();
 		for(int x=0;x<numThreads;x++){
-			MatrixSplitter m = new MatrixSplitter(r_val,i_val,low,rowsPerThread,ncols,real_rate,img_rate,maxIters,"Mandelbrot",c);
+			MatrixSplitter m = new MatrixSplitter(r_val,i_val,low,rowsPerThread,ncols,real_rate,img_rate,maxIters,type,c);
+			m.start();
 			this.numOfThreadedMatrices.add(m);
 			r_val = m.r_val;
 			i_val = m.i_val;
 		}
-		for(MatrixSplitter m : this.numOfThreadedMatrices){
-			m.start();
-		}
 		try{for(MatrixSplitter m : this.numOfThreadedMatrices){m.join();}}catch(InterruptedException e){e.printStackTrace();}
+		
+		long end =  System.currentTimeMillis();
+		
+		NumberFormat formatter = new DecimalFormat("#0.00000");
+		System.out.println("Execution Time is: " + formatter.format((end-start)) + " milliseconds.");
+		
 		for(MatrixSplitter m : this.numOfThreadedMatrices){
 			this.splitEscapeVals.add(m.calculatedEscapeCounts);
 		}
 		escapeVals = MatrixSplitter.combine(splitEscapeVals, nrows, ncols);
-		/*for(int[] row : escapeVals){
-			for(int val : row){
-				System.out.print(val + " ");
-			}
-			System.out.println();
-		}
-		System.out.println();*/
 		return escapeVals;
 	}
 	
