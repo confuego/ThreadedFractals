@@ -28,13 +28,6 @@ public class MatrixSplitter extends Thread {
 		this.r_val = r_val;
 		this.i_val = i_val;
 		
-		/*for(Complex[] row : complexMatrix){
-			for(Complex val : row){
-				System.out.print(val + ", ");
-			}
-			System.out.println();
-		}
-		System.out.println();*/
 		
 	}
 	
@@ -103,16 +96,6 @@ public class MatrixSplitter extends Thread {
 		}
 		else
 			System.out.println("Not a configured Fractal type.");
-		/*synchronized(this){
-			for(int[] row : this.calculatedEscapeCounts){
-				for(int val : row){
-					System.out.print(val + " ");
-				}
-				System.out.println();
-			}
-			System.out.println();
-			System.out.println("Finished with " + Thread.currentThread().getName());
-		}*/
 	}
 	
 	public static int[][] combine(ArrayList<int[][]> matrices,int rowSize,int colSize){

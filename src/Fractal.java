@@ -66,17 +66,22 @@ public abstract class Fractal{
 			type = "Julia";
 		}
 		
-		long start = System.currentTimeMillis();
 		for(int x=0;x<numThreads;x++){
 			MatrixSplitter m = new MatrixSplitter(r_val,i_val,low,rowsPerThread,ncols,real_rate,img_rate,maxIters,type,c);
-			m.start();
 			this.numOfThreadedMatrices.add(m);
 			r_val = m.r_val;
 			i_val = m.i_val;
 		}
-		try{for(MatrixSplitter m : this.numOfThreadedMatrices){m.join();}}catch(InterruptedException e){e.printStackTrace();}
 		
+		int i = 0;
+		while(i<100000000){
+			i++;
+		}
+		long start = System.currentTimeMillis();
+		for(MatrixSplitter m : this.numOfThreadedMatrices){m.start();}
+		try{for(MatrixSplitter m : this.numOfThreadedMatrices){m.join();}}catch(InterruptedException e){e.printStackTrace();}
 		long end =  System.currentTimeMillis();
+		
 		
 		NumberFormat formatter = new DecimalFormat("#0.00000");
 		System.out.println("Execution Time is: " + formatter.format((end-start)) + " milliseconds.");
