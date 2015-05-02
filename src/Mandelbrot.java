@@ -32,7 +32,7 @@ public class Mandelbrot extends Fractal{
 	
 	public static void main(String[] args) throws FileNotFoundException, InterruptedException{
 		
-		if(args.length == 8){
+		if(args.length == 9){
 			Mandelbrot m = new Mandelbrot(new Complex(Double.parseDouble(args[0]),Double.parseDouble(args[2])),new Complex(Double.parseDouble(args[1]),Double.parseDouble(args[3])),Integer.parseInt(args[5]),Integer.parseInt(args[4]),Integer.parseInt(args[6]), Integer.parseInt(args[7]));
 			//m.write(args[7]);
 		}

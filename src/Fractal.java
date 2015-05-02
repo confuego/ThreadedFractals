@@ -66,38 +66,22 @@ public abstract class Fractal{
 		 */
 		//System.out.printf("Real rate: %f Img rate: %f\n",real_rate,img_rate);
 		//System.out.println(numThreads);
-		double i_val = high.i;
-		double r_val = low.r;
-		for(int x=0;x<nrows;x++){
-			for(int y=0;y<ncols;y++){
-				//escapeVals[x][y]=escapeCount(new Complex(r_val,i_val));
-				complexMatrix[x][y] = new Complex(r_val,i_val);
-				r_val = r_val + real_rate;
-			}
-			r_val = low.r;
-			i_val  = i_val - img_rate;
-			//System.out.println();
-		}
 		int rowsPerThread = nrows / numThreads;
-		for(int z=0;z<rowsPerThread;z+=rowsPerThread){
-			Complex[][] perThread = new Complex[rowsPerThread][ncols];
-			for(int x = 0;x < rowsPerThread;x++){
-				for(int y =0; y<ncols; y++){
-					perThread[x][y] = complexMatrix[x][y];
-				}
-			}
-			MatrixSplitter m;
-			if(this instanceof Mandelbrot)
-				m = new MatrixSplitter(perThread,"Mandelbrot",this.maxIters,null);
-			else
-				m = new MatrixSplitter(perThread,"Julia",this.maxIters,this.c);
+		double r_val = low.r;
+		double i_val = high.i;
+		System.out.println(rowsPerThread);
+		for(int x=0;x<numThreads;x++){
+			MatrixSplitter m = new MatrixSplitter(r_val,i_val,low,rowsPerThread,ncols,real_rate,img_rate,maxIters,"Mandelbrot",c);
 			this.numOfThreadedMatrices.add(m);
+			m.start();
+			r_val = m.r_val;
+			i_val = m.i_val;
 		}
 		try{for(MatrixSplitter m : this.numOfThreadedMatrices){m.join();}}catch(InterruptedException e){e.printStackTrace();}
 		for(MatrixSplitter m : this.numOfThreadedMatrices){
 			this.splitEscapeVals.add(m.calculatedEscapeCounts);
 		}
-		MatrixSplitter.combine(splitEscapeVals, nrows, ncols);
+		escapeVals = MatrixSplitter.combine(splitEscapeVals, nrows, ncols);
 		return escapeVals;
 	}
 	
