@@ -9,6 +9,7 @@ public class Zoomer extends JFrame {
   final int IMG_WIDTH = 800;
   final int IMG_HEIGHT = IMG_WIDTH;  // you can change it, but then everything's skewed to begin with.
   int IMG_iters = 100;
+  int threads = 1;
   Complex IMG_c = new Complex(-.62772, .42193);
   
   // lower lefthand corner of the normally-viewed complex plane.
@@ -25,6 +26,7 @@ public class Zoomer extends JFrame {
   
   // some elements of the GUI.
   JButton quitButton, zoomIn, zoomOut, reset;
+
   JLabel viz, region, mloc;
   
   // location for start/stop location of a mouse drag.
@@ -56,8 +58,8 @@ public class Zoomer extends JFrame {
     
     // start with a Mandelbrot fractal.
     currentlyJulia = false;
-    if (currentlyJulia){ fract = new Julia     (IMG_LOW.copy(),IMG_HIGH.copy(),IMG_WIDTH,IMG_HEIGHT,IMG_iters, IMG_c); }
-    else               { fract = new Mandelbrot(IMG_LOW.copy(),IMG_HIGH.copy(),IMG_WIDTH,IMG_HEIGHT,IMG_iters);  }
+    if (currentlyJulia){ fract = new Julia     (IMG_LOW.copy(),IMG_HIGH.copy(),IMG_WIDTH,IMG_HEIGHT,IMG_iters, threads,  IMG_c); }
+    else               { fract = new Mandelbrot(IMG_LOW.copy(),IMG_HIGH.copy(),IMG_WIDTH,IMG_HEIGHT,IMG_iters, threads);  }
     
     // border layout. gaps are 5 in both horiz/vert directions.
     this.setLayout(new BorderLayout(5,5));
@@ -154,9 +156,11 @@ public class Zoomer extends JFrame {
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     
+
+
     // Quit button.
     
-    quitButton = new JButton("quit");
+    quitButton = new JButton("Quit");
     quitButton.setToolTipText("leave the program.");
     quitButton.addActionListener(new ActionListener(){
       @Override
@@ -217,6 +221,29 @@ public class Zoomer extends JFrame {
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     
+    //numThreads label
+    JLabel numThreads = new JLabel ("Number of threads:");
+    rc.gridy++;
+    rightPanel.add(numThreads, rc);
+    final JTextField threadsTF = new JTextField(4);
+    threadsTF.setText(fract.numThreads+"");
+    threadsTF.addActionListener(new ActionListener(){
+      @Override
+      public void actionPerformed(ActionEvent event) {
+        try{
+          int newNumThreads = Integer.parseInt(threadsTF.getText());
+          fract.numThreads = newNumThreads;
+        }
+        catch (NumberFormatException e){}
+      }
+    });
+    rc.gridy++;
+    rightPanel.add(threadsTF,rc);
+
+
+
+
+
     // Iterations label/textfield
     
     JLabel itersLabel = new JLabel ("#iterations:");
@@ -261,9 +288,9 @@ public class Zoomer extends JFrame {
       public void actionPerformed(ActionEvent event) {
         String now = event.getActionCommand();
         if (!currentlyJulia && now.equals(juliaString)){
-          fract = new Julia     (IMG_LOW,IMG_HIGH,IMG_WIDTH,IMG_HEIGHT,fract.maxIters, IMG_c);
+          fract = new Julia     (IMG_LOW,IMG_HIGH,IMG_WIDTH,IMG_HEIGHT,fract.maxIters,fract.numThreads, IMG_c);
         } else if (currentlyJulia && now.equals(mandelString)) {
-          fract = new Mandelbrot(IMG_LOW,IMG_HIGH,IMG_WIDTH,IMG_HEIGHT,fract.maxIters);
+          fract = new Mandelbrot(IMG_LOW,IMG_HIGH,IMG_WIDTH,IMG_HEIGHT,fract.maxIters, threads);
         }
         currentlyJulia = ! currentlyJulia;
         itersTF.setText(fract.maxIters+"");

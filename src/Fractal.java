@@ -7,16 +7,18 @@ public abstract class Fractal{
 	Complex low,high;	// lower-left and upper-right coordinates
 	int nrows,ncols;	// pixel counting
 	int maxIters;	// how many iterations to consider
+	int numThreads;
 	int[][] escapeVals;	// cached answers for each point's iterations to escape
 	Complex c;	// what is the c value of the iteration function? (boring for Mendelbrot)
 	
-	public Fractal(Complex iMG_LOW, Complex iMG_HIGH, int iMG_WIDTH,int iMG_HEIGHT, int maxIters){
+	public Fractal(Complex iMG_LOW, Complex iMG_HIGH, int iMG_WIDTH,int iMG_HEIGHT, int maxIters, int numThreads){
 		this.low = iMG_LOW;
 		this.high = iMG_HIGH;
 		this.ncols = iMG_WIDTH;
 		this.nrows = iMG_HEIGHT;
 		this.maxIters = maxIters;
 		this.escapeVals = new int[nrows][ncols];
+		this.numThreads = numThreads;
 		double real_dist = 0;
 		double img_dist = 0;
 		if(high.r > 0)
@@ -58,6 +60,7 @@ public abstract class Fractal{
 		 * return matrix
 		 */
 		//System.out.printf("Real rate: %f Img rate: %f\n",real_rate,img_rate);
+		System.out.println(numThreads);
 		double i_val = high.i;
 		double r_val = low.r;
 		for(int x=0;x<nrows;x++){
