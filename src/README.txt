@@ -1,0 +1,2 @@
+In the mandelbrot set, the far left column in your example has the value 40, mine gets 14. Every other value is correct, though.. Don't have the slightest clue why.
+The program will create the txt files if they dont already exist. 
