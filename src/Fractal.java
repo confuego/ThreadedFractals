@@ -11,7 +11,6 @@ public abstract class Fractal{
 	int maxIters;	// how many iterations to consider
 	int numThreads; // how many threads there are
 	Complex[][] complexMatrix; // matrix of the complex numbers.
-	ArrayList<MatrixSplitter> numOfThreadedMatrices = new ArrayList<MatrixSplitter>();
 	//ArrayList<int[][]> splitEscapeVals = new ArrayList<int[][]>();
 	int[][] escapeVals;	// cached answers for each point's iterations to escape
 	Complex c;	// what is the c value of the iteration function? (boring for Mendelbrot)
@@ -72,19 +71,31 @@ public abstract class Fractal{
 			i_val  = i_val - img_rate;
 			//System.out.println();
 		}
+		MatrixSplitter[] list = new MatrixSplitter[2];
 		
-		MatrixSplitter m = new MatrixSplitter(this,0,200,800);
-		this.numOfThreadedMatrices.add(m);
-		MatrixSplitter m2 = new MatrixSplitter(this,200,400,800);
-		this.numOfThreadedMatrices.add(m2);
-		MatrixSplitter m3 = new MatrixSplitter(this,400,600,800);
-		this.numOfThreadedMatrices.add(m3);
-		MatrixSplitter m4 = new MatrixSplitter(this,600,800,800);
-		this.numOfThreadedMatrices.add(m4);
+		MatrixSplitter m = new MatrixSplitter(this,0,800,800);
+		list[0] = m;
+		//long start = System.currentTimeMillis();
+		//MatrixSplitter m2 = new MatrixSplitter(this,400,800,800);
+		//list[1] = m2;
+		//MatrixSplitter m3 = new MatrixSplitter(this,400,600,800);
+		//this.numOfThreadedMatrices.add(m3);
+		//MatrixSplitter m4 = new MatrixSplitter(this,600,800,800);
+		//this.numOfThreadedMatrices.add(m4);
 		
 		long start = System.currentTimeMillis();
-		for(MatrixSplitter n : this.numOfThreadedMatrices){n.start();}
-		try{for(MatrixSplitter n : this.numOfThreadedMatrices){n.join();}}catch(InterruptedException e){e.printStackTrace();}
+		list[0].start();
+		//list[1].start();
+		try{list[0].join();}catch(InterruptedException e){e.printStackTrace();}
+		//try{list[1].join();}catch(InterruptedException e){e.printStackTrace();}
+		/*for(int x=0;x<list.length;x++){
+			list[x].start();
+		}
+		try{
+			for(int x =0;x<list.length;x++){
+				list[x].join();
+			}
+		}catch(InterruptedException e){e.printStackTrace();}*/
 		long end =  System.currentTimeMillis();
 		
 		

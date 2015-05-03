@@ -22,11 +22,10 @@ public class Mandelbrot extends Fractal{
 				max=count;
 			if(val > 2)
 				break;
-			z = Complex.add(Complex.mul(z, z), c);
+			z = Complex.add(Complex.mul(z, z), p);
 			//System.out.printf("Z is: %s\n",z);
 			count++;
 		}
-		// TODO Auto-generated method stub
 		this.c = new Complex(0,0);
 		return max;
 	}
