@@ -12,7 +12,7 @@ public abstract class Fractal{
 	int numThreads; // how many threads there are
 	Complex[][] complexMatrix; // matrix of the complex numbers.
 	ArrayList<MatrixSplitter> numOfThreadedMatrices = new ArrayList<MatrixSplitter>();
-	ArrayList<int[][]> splitEscapeVals = new ArrayList<int[][]>();
+	//ArrayList<int[][]> splitEscapeVals = new ArrayList<int[][]>();
 	int[][] escapeVals;	// cached answers for each point's iterations to escape
 	Complex c;	// what is the c value of the iteration function? (boring for Mendelbrot)
 	
@@ -43,6 +43,8 @@ public abstract class Fractal{
 	
 	
 	
+	public abstract int escapeCount(Complex p);
+	
 	/*
 	 * Given one point p,how many iterations can you follow, up	to	maxIters,	before	it	escapes?	
 	 * This	means all points in	the	set	will return	maxIters.
@@ -57,48 +59,47 @@ public abstract class Fractal{
 	 */
 	public int[][] escapes(){
 		int rowsPerThread = nrows / numThreads;
-		double r_val = low.r;
 		double i_val = high.i;
+		double r_val = low.r;
 		
 		
-		String type = "Mandelbrot";
-		if(this instanceof Julia){
-			type = "Julia";
+		for(int x=0;x<nrows;x++){
+			for(int y=0;y<ncols;y++){
+				complexMatrix[x][y] = new Complex(r_val,i_val);
+				r_val = r_val + real_rate;
+			}
+			r_val = low.r;
+			i_val  = i_val - img_rate;
+			//System.out.println();
 		}
 		
-		for(int x=0;x<numThreads;x++){
-			MatrixSplitter m = new MatrixSplitter(r_val,i_val,low,rowsPerThread,ncols,real_rate,img_rate,maxIters,type,c);
-			this.numOfThreadedMatrices.add(m);
-			r_val = m.r_val;
-			i_val = m.i_val;
-		}
+		MatrixSplitter m = new MatrixSplitter(this,0,200,800);
+		this.numOfThreadedMatrices.add(m);
+		MatrixSplitter m2 = new MatrixSplitter(this,200,400,800);
+		this.numOfThreadedMatrices.add(m2);
+		MatrixSplitter m3 = new MatrixSplitter(this,400,600,800);
+		this.numOfThreadedMatrices.add(m3);
+		MatrixSplitter m4 = new MatrixSplitter(this,600,800,800);
+		this.numOfThreadedMatrices.add(m4);
 		
-		int i = 0;
-		while(i<100000000){
-			i++;
-		}
 		long start = System.currentTimeMillis();
-		for(MatrixSplitter m : this.numOfThreadedMatrices){m.start();}
-		try{for(MatrixSplitter m : this.numOfThreadedMatrices){m.join();}}catch(InterruptedException e){e.printStackTrace();}
+		for(MatrixSplitter n : this.numOfThreadedMatrices){n.start();}
+		try{for(MatrixSplitter n : this.numOfThreadedMatrices){n.join();}}catch(InterruptedException e){e.printStackTrace();}
 		long end =  System.currentTimeMillis();
 		
 		
 		NumberFormat formatter = new DecimalFormat("#0.00000");
-		System.out.println("Execution Time is: " + formatter.format((end-start)) + " milliseconds.");
+		System.out.println("Total Execution Time is: " + formatter.format((end-start)) + " milliseconds.");
 		
-		for(MatrixSplitter m : this.numOfThreadedMatrices){
-			this.splitEscapeVals.add(m.calculatedEscapeCounts);
-		}
-		escapeVals = MatrixSplitter.combine(splitEscapeVals, nrows, ncols);
 		return escapeVals;
 	}
 	
 	
 	/*
-	 * Given	a	file	name,	calculate	all	escape	counts	as	needed,	
-	 * and	create	a	file	containing	these	lines.	(See	example	below)
+	 * Given a file	name, calculate	all	escape counts as needed,	
+	 * and	create	a	file	containing	these	lines.	(See example below)
 	 * nrows	ncols	maxIters
-	 * lowRealVal		highRealVal		lowImaginaryVal		highImaginaryVal
+	 * lowRealVal highRealVal lowImaginaryVal highImaginaryVal
 	 * realC		imaginaryC
 	 * <a	blank	line>
 	 * each	row	from	escapeVals	as	a	line,	with	its	values	separated	by	whitespace	(please	pad	all	items	to	the	same	minimal	spacing	width	as	shown	below)
@@ -133,7 +134,6 @@ public abstract class Fractal{
 		Complex scale = new Complex(1/factor,0);
 		high = Complex.mul(high,scale);
 		low = Complex.mul(low, scale);
-		//this.escapes();
 		
 	}
 	

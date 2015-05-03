@@ -10,7 +10,26 @@ public class Mandelbrot extends Fractal{
 		super(iMG_LOW,iMG_HIGH,iMG_WIDTH,iMG_HEIGHT,maxIters,numThreads);
 		this.c = new Complex(0,0);
 	}
-
+	
+	public int escapeCount(Complex p){
+		this.c = p;
+		Complex z = new Complex(0,0);
+		int max = 0;// this is just in case it goes above two and then back under two.
+		int count=0;
+		while(count<=this.maxIters){
+			double val = Complex.abs(z);
+			if(val <= 2)
+				max=count;
+			if(val > 2)
+				break;
+			z = Complex.add(Complex.mul(z, z), c);
+			//System.out.printf("Z is: %s\n",z);
+			count++;
+		}
+		// TODO Auto-generated method stub
+		this.c = new Complex(0,0);
+		return max;
+	}
 	
 	public static void main(String[] args) throws FileNotFoundException, InterruptedException{
 		//long start = System.nanoTime();
